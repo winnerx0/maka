@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.media.MediaView?>
+
+<BorderPane xmlns="http://javafx.com/javafx/24.0.2"
+            xmlns:fx="http://javafx.com/fxml/1"
+            style="-fx-border-width: 0; -fx-background-color: black;"
+            fx:controller="com.winnerx0.maka.MakaController">
+
+    <center>
+        <MediaView fx:id="mediaView" preserveRatio="true" />
+    </center>
+
+</BorderPane>
