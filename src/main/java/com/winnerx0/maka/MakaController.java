@@ -4,6 +4,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -25,14 +27,20 @@ public class MakaController implements Initializable {
     private MediaPlayer player;
 
     @FXML
-    private Button playButton;
-
-    @FXML
     private MediaView mediaView;
 
     private File file;
 
-    private List<File> files;
+    private LinkedList<File> files;
+
+    @FXML
+    private Button playPauseButton;
+
+    @FXML
+    private StackPane stackPane;
+
+    @FXML
+    private AnchorPane buttonAnchorPane;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -45,18 +53,45 @@ public class MakaController implements Initializable {
 
             file = files.get(0);
 
-            playVideo(file);
+            buttonAnchorPane.setVisible(false);
+            buttonAnchorPane.setManaged(false);
+
+            stackPane.setOnMouseEntered(event -> {
+                buttonAnchorPane.setVisible(true);
+                buttonAnchorPane.setManaged(true);
+            });
+
+            stackPane.setOnMouseExited(event -> {
+                buttonAnchorPane.setVisible(false);
+                buttonAnchorPane.setManaged(false);
+            });
+
+            playPauseVideo(file);
+
         } catch (Exception e) {
             System.err.println("Failed to initialize media");
             e.printStackTrace();
         }
     }
 
-    public void playVideo(File file){
+    @FXML
+    public void playPauseVideo(){
+
+        if(player.getStatus() ==  MediaPlayer.Status.PLAYING || player.getStatus() ==  MediaPlayer.Status.UNKNOWN){
+            player.pause();
+            playPauseButton.setText("Play");
+        } else {
+            player.play();
+            playPauseButton.setText("Pause");
+        }
+    }
+
+    public void playPauseVideo(File file){
+
+        playPauseButton.setText("Pause");
 
         media = new Media(file.toURI().toString());
 
-        // Add error handler before creating MediaPlayer
         media.setOnError(() -> {
             System.err.println("Media error: " + media.getError());
         });
@@ -80,6 +115,8 @@ public class MakaController implements Initializable {
 
         mediaView.setMediaPlayer(player);
 
+        player.play();
+
     }
 
     @FXML
@@ -94,14 +131,14 @@ public class MakaController implements Initializable {
         File previousVideo;
 
         if(previousVideoIndex == -1){
-            previousVideo = files.getLast();
+            previousVideo = files.peekLast();
         }else {
             previousVideo = files.get(previousVideoIndex);
         }
 
         System.out.println(previousVideo.getAbsoluteFile());
 
-        playVideo(previousVideo);
+        playPauseVideo(previousVideo);
     }
 
     @FXML
@@ -115,7 +152,7 @@ public class MakaController implements Initializable {
         File nextVideo;
 
         if(nextVideoIndex == files.size()){
-            nextVideo = files.getFirst();
+            nextVideo = files.peekFirst();
         } else {
             nextVideo = files.get(nextVideoIndex);
         }
@@ -123,6 +160,6 @@ public class MakaController implements Initializable {
         System.out.println(nextVideo.getAbsoluteFile());
 
 
-        playVideo(nextVideo);
+        playPauseVideo(nextVideo);
     }
 }
