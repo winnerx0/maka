@@ -18,7 +18,6 @@ public class MakaApplication extends Application {
         stage.setTitle("Maka");
         stage.setScene(scene);
 
-
         stage.show();
     }
 }

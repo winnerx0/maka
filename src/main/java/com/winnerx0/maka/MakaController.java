@@ -10,7 +10,12 @@ import javafx.scene.media.MediaView;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 public class MakaController implements Initializable {
 
@@ -27,55 +32,97 @@ public class MakaController implements Initializable {
 
     private File file;
 
-    @FXML
-    private Label welcomeText;
-
-    @FXML
-    protected void onHelloButtonClick() {
-        welcomeText.setText("Welcome to JavaFX Application!");
-    }
+    private List<File> files;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        try {
-            file = new File("/home/winner/Videos/AnimePahe_Grand_Blue_Season_2_-_06_720p_SubsPlease.mp4");
-            if (!file.exists()) {
-                System.err.println("Video file not found!");
-                return;
-            }
+        try(Stream<Path> walk = Files.walk(Path.of("/home/winner/Videos"));) {
 
-            media = new Media(file.toURI().toString());
 
-            // Add error handler before creating MediaPlayer
-            media.setOnError(() -> {
-                System.err.println("Media error: " + media.getError());
-            });
+            files = new LinkedList<>(walk.map(Path::toFile).filter(File::isFile).toList());
 
-            player = new MediaPlayer(media);
+            System.out.println(files);
 
-            player.setOnError(() -> {
-                System.err.println("Player error: " + player.getError());
-            });
+            file = files.get(0);
 
-            player.setOnReady(() -> {
-                System.out.println("Duration: " + media.getDuration());
-                mediaView.fitWidthProperty().bind(mediaView.getScene().widthProperty());
-                mediaView.fitHeightProperty().bind(mediaView.getScene().heightProperty());
-                mediaView.setPreserveRatio(true);
-
-                player.play();
-            });
-
-            mediaView.setMediaPlayer(player);
-
+            playVideo(file);
         } catch (Exception e) {
             System.err.println("Failed to initialize media");
             e.printStackTrace();
         }
     }
 
+    public void playVideo(File file){
+
+        media = new Media(file.toURI().toString());
+
+        // Add error handler before creating MediaPlayer
+        media.setOnError(() -> {
+            System.err.println("Media error: " + media.getError());
+        });
+
+        player = new MediaPlayer(media);
+
+        player.setOnError(() -> {
+            System.err.println("Player error: " + player.getError());
+        });
+
+        player.setOnReady(() -> {
+            System.out.println("Duration: " + media.getDuration());
+            mediaView.fitWidthProperty().bind(mediaView.getScene().widthProperty());
+            mediaView.fitHeightProperty().bind(mediaView.getScene().heightProperty());
+            mediaView.setPreserveRatio(true);
+
+            player.play();
+        });
+
+        mediaView.setPreserveRatio(true);
+
+        mediaView.setMediaPlayer(player);
+
+    }
+
     @FXML
-    public void playVideo(){
-        player.play();
+    public void previousVideo(){
+
+        String currentVideo = player.getMedia().getSource();
+
+        System.out.println(currentVideo);
+
+        int previousVideoIndex = files.indexOf(Path.of(currentVideo.replace("file:", "")).toFile()) - 1;
+
+        File previousVideo;
+
+        if(previousVideoIndex == -1){
+            previousVideo = files.getLast();
+        }else {
+            previousVideo = files.get(previousVideoIndex);
+        }
+
+        System.out.println(previousVideo.getAbsoluteFile());
+
+        playVideo(previousVideo);
+    }
+
+    @FXML
+    public void nextVideo(){
+        String currentVideo = player.getMedia().getSource();
+
+        System.out.println("current video " + currentVideo);
+
+        int nextVideoIndex = files.indexOf(Path.of(currentVideo.replace("file:", "")).toFile()) + 1;
+
+        File nextVideo;
+
+        if(nextVideoIndex == files.size()){
+            nextVideo = files.getFirst();
+        } else {
+            nextVideo = files.get(nextVideoIndex);
+        }
+
+        System.out.println(nextVideo.getAbsoluteFile());
+
+
+        playVideo(nextVideo);
     }
 }
