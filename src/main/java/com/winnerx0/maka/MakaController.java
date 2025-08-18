@@ -53,9 +53,6 @@ public class MakaController implements Initializable {
 
             file = files.get(0);
 
-            buttonAnchorPane.setVisible(false);
-            buttonAnchorPane.setManaged(false);
-
             stackPane.setOnMouseEntered(event -> {
                 buttonAnchorPane.setVisible(true);
                 buttonAnchorPane.setManaged(true);
