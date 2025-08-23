@@ -6,6 +6,8 @@
 <?import javafx.scene.media.MediaView?>
 
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.VBox?>
 <BorderPane xmlns="http://javafx.com/javafx/24.0.2"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.winnerx0.maka.MakaController"
@@ -18,39 +20,46 @@
     <StackPane fx:id="stackPane">
         <MediaView fx:id="mediaView"
                    preserveRatio="true"
-                   fitWidth="800"
-                   fitHeight="600" />
+                />
 
 
-        <AnchorPane prefHeight="80" fx:id="buttonAnchorPane">
+        <VBox alignment="BOTTOM_CENTER" spacing="10" fx:id="vBox">
+            <!-- Progress bar -->
+            <ProgressBar fx:id="progressBar"
+                         styleClass="progress-bar"
+                         prefWidth="600"
+                         prefHeight="30"
+                         maxWidth="Infinity"/>
 
-            <Button fx:id="previousButton"
-                    onAction="#previousVideo"
-                    text="Previous"
-                    prefWidth="100"
-                    prefHeight="35"
-                    styleClass="media-button"
-                    AnchorPane.leftAnchor="50.0"
-                    AnchorPane.bottomAnchor="22.5" />
+            <!-- Buttons in a row -->
+            <AnchorPane prefHeight="80">
+                <Button fx:id="previousButton"
+                        onAction="#previousVideo"
+                        text="Previous"
+                        prefWidth="100"
+                        prefHeight="35"
+                        styleClass="media-button"
+                        AnchorPane.leftAnchor="50.0"
+                        AnchorPane.bottomAnchor="22.5" />
 
-            <Button fx:id="playPauseButton"
-                    onAction="#playPauseVideo"
-                    prefWidth="100"
-                    prefHeight="35"
-                    styleClass="media-button"
-                    AnchorPane.leftAnchor="170.0"
-                    AnchorPane.bottomAnchor="22.5" />
+                <Button fx:id="playPauseButton"
+                        onAction="#playPauseVideo"
+                        prefWidth="100"
+                        prefHeight="35"
+                        styleClass="media-button"
+                        AnchorPane.leftAnchor="170.0"
+                        AnchorPane.bottomAnchor="22.5" />
 
-            <Button fx:id="nextButton"
-                    onAction="#nextVideo"
-                    text="Next"
-                    prefWidth="100"
-                    prefHeight="35"
-                    styleClass="media-button"
-                    AnchorPane.rightAnchor="50.0"
-                    AnchorPane.bottomAnchor="22.5" />
-        </AnchorPane>
-
+                <Button fx:id="nextButton"
+                        onAction="#nextVideo"
+                        text="Next"
+                        prefWidth="100"
+                        prefHeight="35"
+                        styleClass="media-button"
+                        AnchorPane.rightAnchor="50.0"
+                        AnchorPane.bottomAnchor="22.5" />
+            </AnchorPane>
+        </VBox>
     </StackPane>
 </center>
 

@@ -1,22 +1,25 @@
 package com.winnerx0.maka;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public class MakaController implements Initializable {
@@ -34,13 +37,18 @@ public class MakaController implements Initializable {
     private LinkedList<File> files;
 
     @FXML
-    private Button playPauseButton;
+    private Button playPauseButton, previousButton;
 
     @FXML
     private StackPane stackPane;
 
     @FXML
-    private AnchorPane buttonAnchorPane;
+    private VBox vBox;
+
+    @FXML
+    private ProgressBar progressBar;
+
+    private DoubleBinding progressBinding;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -53,17 +61,42 @@ public class MakaController implements Initializable {
 
             file = files.get(0);
 
-            stackPane.setOnMouseEntered(event -> {
-                buttonAnchorPane.setVisible(true);
-                buttonAnchorPane.setManaged(true);
+            stackPane.setOnMouseMoved(event -> {
+                vBox.setVisible(true);
+                vBox.setManaged(true);
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        Thread.sleep(java.time.Duration.ofSeconds(3));
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    vBox.setVisible(false);
+                    vBox.setManaged(false);;
+                });
             });
 
             stackPane.setOnMouseExited(event -> {
-                buttonAnchorPane.setVisible(false);
-                buttonAnchorPane.setManaged(false);
+                vBox.setVisible(false);
+                vBox.setManaged(false);
             });
 
             playPauseVideo(file);
+
+            progressBar.progressProperty().bind(
+                    Bindings.createDoubleBinding(
+                            () -> player.getCurrentTime().toSeconds() / player.getTotalDuration().toSeconds(),
+                            player.currentTimeProperty(),
+                            player.totalDurationProperty()
+                    )
+            );
+
+            progressBar.setOnMouseClicked(event -> {
+                double mouseX = event.getX();
+                double barWidth = progressBar.getWidth();
+                double seekTimeRatio = mouseX / barWidth;
+                Duration seekTime = player.getTotalDuration().multiply(seekTimeRatio);
+                player.seek(seekTime);
+            });
 
         } catch (Exception e) {
             System.err.println("Failed to initialize media");
@@ -74,7 +107,7 @@ public class MakaController implements Initializable {
     @FXML
     public void playPauseVideo(){
 
-        if(player.getStatus() ==  MediaPlayer.Status.PLAYING || player.getStatus() ==  MediaPlayer.Status.UNKNOWN){
+        if(player.getStatus() == MediaPlayer.Status.PLAYING || player.getStatus() == MediaPlayer.Status.UNKNOWN){
             player.pause();
             playPauseButton.setText("Play");
         } else {
@@ -84,6 +117,12 @@ public class MakaController implements Initializable {
     }
 
     public void playPauseVideo(File file){
+
+        if (player != null) {
+            player.stop();
+            player.dispose();
+            player = null;
+        }
 
         playPauseButton.setText("Pause");
 
@@ -104,6 +143,8 @@ public class MakaController implements Initializable {
             mediaView.fitWidthProperty().bind(mediaView.getScene().widthProperty());
             mediaView.fitHeightProperty().bind(mediaView.getScene().heightProperty());
             mediaView.setPreserveRatio(true);
+
+            setupProgressBinding();
 
             player.play();
         });
@@ -136,10 +177,13 @@ public class MakaController implements Initializable {
         System.out.println(previousVideo.getAbsoluteFile());
 
         playPauseVideo(previousVideo);
+
+        previousButton.setFocusTraversable(false);
     }
 
     @FXML
     public void nextVideo(){
+
         String currentVideo = player.getMedia().getSource();
 
         System.out.println("current video " + currentVideo);
@@ -158,5 +202,23 @@ public class MakaController implements Initializable {
 
 
         playPauseVideo(nextVideo);
+    }
+
+    private void setupProgressBinding() {
+        // Create new binding for this player
+        progressBinding = Bindings.createDoubleBinding(
+                () -> {
+                    Duration currentTime = player.getCurrentTime();
+                    Duration totalDuration = player.getTotalDuration();
+                    if (totalDuration == null || totalDuration.toSeconds() == 0) {
+                        return 0.0;
+                    }
+                    return currentTime.toSeconds() / totalDuration.toSeconds();
+                },
+                player.currentTimeProperty(),
+                player.totalDurationProperty()
+        );
+
+        progressBar.progressProperty().bind(progressBinding);
     }
 }
