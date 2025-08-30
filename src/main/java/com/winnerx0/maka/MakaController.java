@@ -1,7 +1,9 @@
 package com.winnerx0.maka;
 
+import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.StringBinding;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -11,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -37,7 +40,7 @@ public class MakaController implements Initializable {
     private LinkedList<File> files;
 
     @FXML
-    private Button playPauseButton, previousButton;
+    private Button playPauseButton, previousButton, nextButton;
 
     @FXML
     private StackPane stackPane;
@@ -48,12 +51,21 @@ public class MakaController implements Initializable {
     @FXML
     private ProgressBar progressBar;
 
-    private DoubleBinding progressBinding;
+    private DoubleBinding progressTitleBinding;
+
+    @FXML
+    private Text progressTitle;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try(Stream<Path> walk = Files.walk(Path.of("/home/winner/Videos"));) {
 
+
+            nextButton.setFocusTraversable(false);
+
+            previousButton.setFocusTraversable(false);
+
+            playPauseButton.setFocusTraversable(false);
 
             files = new LinkedList<>(walk.map(Path::toFile).filter(File::isFile).toList());
 
@@ -61,36 +73,27 @@ public class MakaController implements Initializable {
 
             file = files.get(0);
 
-            stackPane.setOnMouseMoved(event -> {
-                vBox.setVisible(true);
-                vBox.setManaged(true);
-                CompletableFuture.runAsync(() -> {
-                    try {
-                        Thread.sleep(java.time.Duration.ofSeconds(3));
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    vBox.setVisible(false);
-                    vBox.setManaged(false);;
-                });
-            });
+            PauseTransition idleTimer = new PauseTransition(Duration.seconds(30));
 
-            stackPane.setOnMouseExited(event -> {
+            idleTimer.setOnFinished(event -> {
                 vBox.setVisible(false);
                 vBox.setManaged(false);
             });
 
+            stackPane.setOnMouseMoved(event -> {
+                vBox.setVisible(true);
+                vBox.setManaged(true);
+                idleTimer.playFromStart();
+            });
+
+//            stackPane.setOnMouseExited(event -> {
+//                vBox.setVisible(false);
+//                vBox.setManaged(false);
+//            });
+
             playPauseVideo(file);
 
-            progressBar.progressProperty().bind(
-                    Bindings.createDoubleBinding(
-                            () -> player.getCurrentTime().toSeconds() / player.getTotalDuration().toSeconds(),
-                            player.currentTimeProperty(),
-                            player.totalDurationProperty()
-                    )
-            );
-
-            progressBar.setOnMouseClicked(event -> {
+            progressBar.setOnMouseDragged(event -> {
                 double mouseX = event.getX();
                 double barWidth = progressBar.getWidth();
                 double seekTimeRatio = mouseX / barWidth;
@@ -206,7 +209,7 @@ public class MakaController implements Initializable {
 
     private void setupProgressBinding() {
         // Create new binding for this player
-        progressBinding = Bindings.createDoubleBinding(
+        DoubleBinding progressBinding = Bindings.createDoubleBinding(
                 () -> {
                     Duration currentTime = player.getCurrentTime();
                     Duration totalDuration = player.getTotalDuration();
@@ -219,6 +222,30 @@ public class MakaController implements Initializable {
                 player.totalDurationProperty()
         );
 
+        StringBinding progressTitleBinding = Bindings.createStringBinding(() -> {
+            Duration currentTime = player.getCurrentTime();
+            Duration totalDuration = player.getTotalDuration();
+
+            if (totalDuration == null || totalDuration.toSeconds() == 0) {
+                return String.format("%f / %f", currentTime.toSeconds(), 0.0);
+            }
+
+            String current = String.format("%02d:%02d:%02d",
+                    Double.valueOf(Math.floor(currentTime.toHours() % 60)).intValue(),
+                    Double.valueOf(Math.floor(currentTime.toMinutes() % 60)).intValue(),
+                    Double.valueOf(Math.floor(currentTime.toSeconds() % 60)).intValue());
+
+            String total = String.format("%02d:%02d:%02d",
+                    Double.valueOf(Math.floor(totalDuration.toHours() % 60)).intValue(),
+                    Double.valueOf(Math.floor(totalDuration.toMinutes() % 60)).intValue(),
+                    Double.valueOf(Math.floor(totalDuration.toSeconds() % 60)).intValue());
+
+            return String.format("%s / %s", current, total);
+        },
+                player.currentTimeProperty(),
+                player.totalDurationProperty());
+
         progressBar.progressProperty().bind(progressBinding);
+        progressTitle.textProperty().bind(progressTitleBinding);
     }
 }

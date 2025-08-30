@@ -23,13 +23,16 @@
     -fx-scale-y: 0.95;
 }
 
-.media-button:focused {
-    -fx-border-color: #4fc3f7;
-    -fx-border-width: 2px;
-}
-
 .progress-bar {
     -fx-accent: #3498db;
+    /*-fx-control-inner-background: none;*/
+    -fx-opacity: 0.5;
+}
+
+.progress-title {
+    -fx-font-size: 25;
+    -fx-font-weight: bold;
+    -fx-fill: white;
 }
 /* Media view styling */
 .media-view {

@@ -8,6 +8,9 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.layout.HBox?>
 <BorderPane xmlns="http://javafx.com/javafx/24.0.2"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.winnerx0.maka.MakaController"
@@ -23,13 +26,19 @@
                 />
 
 
-        <VBox alignment="BOTTOM_CENTER" spacing="10" fx:id="vBox">
+        <VBox alignment="BOTTOM_CENTER" spacing="5" fx:id="vBox">
+            <padding>
+                <Insets right="60.0" left="60.0" />
+            </padding>
             <!-- Progress bar -->
-            <ProgressBar fx:id="progressBar"
-                         styleClass="progress-bar"
-                         prefWidth="600"
-                         prefHeight="30"
-                         maxWidth="Infinity"/>
+             <HBox spacing="10" alignment="CENTER">
+                  <ProgressBar fx:id="progressBar"
+                        styleClass="progress-bar"
+                        prefWidth="600"
+                        prefHeight="30"
+                        maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                 <Text fx:id="progressTitle" text="hey this is a text" styleClass="progress-title"/>
+            </HBox>
 
             <!-- Buttons in a row -->
             <AnchorPane prefHeight="80">
