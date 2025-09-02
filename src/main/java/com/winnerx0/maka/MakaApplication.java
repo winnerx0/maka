@@ -1,10 +1,10 @@
 package com.winnerx0.maka;
 
+import com.winnerx0.maka.controller.MakaController;
+import com.winnerx0.maka.enums.Volume;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -20,7 +20,7 @@ public class MakaApplication extends Application {
         MakaController controller = fxmlLoader.getController();
 
         Scene scene = new Scene(root, 960, 540);
-        stage.setTitle("Maka");
+        stage.setTitle("MAKA");
 
 
 
@@ -37,6 +37,12 @@ public class MakaApplication extends Application {
                     break;
                 case F:
                     stage.setFullScreen(!stage.isFullScreen());
+                case UP:
+                    controller.volumeControl(Volume.UP);
+                    break;
+                case DOWN:
+                    controller.volumeControl(Volume.DOWN);
+                    break;
                 default:
                     break;
             }

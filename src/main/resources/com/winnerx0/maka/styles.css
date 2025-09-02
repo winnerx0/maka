@@ -34,6 +34,11 @@
     -fx-font-weight: bold;
     -fx-fill: white;
 }
+
+.volume-bar {
+    -fx-font-size: 20px;
+    -fx-fill: white;
+}
 /* Media view styling */
 .media-view {
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 5);

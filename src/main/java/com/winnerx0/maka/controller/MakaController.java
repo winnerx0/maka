@@ -1,8 +1,10 @@
-package com.winnerx0.maka;
+package com.winnerx0.maka.controller;
 
+import com.winnerx0.maka.enums.Volume;
 import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -15,6 +17,8 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URL;
@@ -22,11 +26,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.ResourceBundle;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public class MakaController implements Initializable {
-
 
     private Media media;
 
@@ -51,15 +53,17 @@ public class MakaController implements Initializable {
     @FXML
     private ProgressBar progressBar;
 
-    private DoubleBinding progressTitleBinding;
+    private IntegerBinding volumeBinding;
 
     @FXML
-    private Text progressTitle;
+    private Text progressTitle, volumeIndicator;
+
+    private static final Logger logger = LoggerFactory.getLogger(MakaController.class);
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        try(Stream<Path> walk = Files.walk(Path.of("/home/winner/Videos"));) {
 
+        try(Stream<Path> walk = Files.walk(Path.of("/home/winner/Videos"));) {
 
             nextButton.setFocusTraversable(false);
 
@@ -73,7 +77,7 @@ public class MakaController implements Initializable {
 
             file = files.get(0);
 
-            PauseTransition idleTimer = new PauseTransition(Duration.seconds(30));
+            PauseTransition idleTimer = new PauseTransition(Duration.seconds(1.5));
 
             idleTimer.setOnFinished(event -> {
                 vBox.setVisible(false);
@@ -86,14 +90,24 @@ public class MakaController implements Initializable {
                 idleTimer.playFromStart();
             });
 
-//            stackPane.setOnMouseExited(event -> {
-//                vBox.setVisible(false);
-//                vBox.setManaged(false);
-//            });
+            stackPane.setOnMouseExited(event -> {
+                vBox.setVisible(false);
+                vBox.setManaged(false);
+            });
 
             playPauseVideo(file);
 
+            progressBar.setOnMouseClicked(event -> {
+                double mouseX = event.getX();
+                double barWidth = progressBar.getWidth();
+                double seekTimeRatio = mouseX / barWidth;
+                Duration seekTime = player.getTotalDuration().multiply(seekTimeRatio);
+                player.seek(seekTime);
+            });
+
             progressBar.setOnMouseDragged(event -> {
+                vBox.setVisible(true);
+                vBox.setManaged(true);
                 double mouseX = event.getX();
                 double barWidth = progressBar.getWidth();
                 double seekTimeRatio = mouseX / barWidth;
@@ -146,7 +160,7 @@ public class MakaController implements Initializable {
             mediaView.fitWidthProperty().bind(mediaView.getScene().widthProperty());
             mediaView.fitHeightProperty().bind(mediaView.getScene().heightProperty());
             mediaView.setPreserveRatio(true);
-
+            volumeIndicator.setText(Double.toString(Math.floor(player.getVolume()  * 100)));
             setupProgressBinding();
 
             player.play();
@@ -248,4 +262,19 @@ public class MakaController implements Initializable {
         progressBar.progressProperty().bind(progressBinding);
         progressTitle.textProperty().bind(progressTitleBinding);
     }
+
+    public void volumeControl(Volume volume) {
+        double volumeInfo = player.getVolume();
+        System.out.println("Current volume: " + volume);
+
+        if (volume.equals(Volume.UP)) {
+            player.setVolume(Math.min(volumeInfo + 0.01, 1.0));
+        } else {
+            player.setVolume(Math.max(volumeInfo - 0.01, 0.0));
+        }
+
+        double newVolume = player.getVolume();
+        volumeIndicator.setText(Double.toString(Math.floor(newVolume * 100)));
+    }
+
 }

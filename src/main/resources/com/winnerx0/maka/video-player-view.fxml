@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.HBox?>
 <BorderPane xmlns="http://javafx.com/javafx/24.0.2"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.winnerx0.maka.MakaController"
+            fx:controller="com.winnerx0.maka.controller.MakaController"
             stylesheets="@styles.css"
             style="-fx-background-color: black;">
 
@@ -21,9 +21,20 @@
 <center>
 
     <StackPane fx:id="stackPane">
-        <MediaView fx:id="mediaView"
-                   preserveRatio="true"
-                />
+        <StackPane>
+            <MediaView fx:id="mediaView"
+                       preserveRatio="true"
+            />
+
+            <HBox>
+
+                <padding>
+                    <Insets left="60.0" top="20"/>
+                </padding>
+
+                <Text styleClass="volume-bar" fx:id="volumeIndicator" />
+            </HBox>
+        </StackPane>
 
 
         <VBox alignment="BOTTOM_CENTER" spacing="5" fx:id="vBox">
