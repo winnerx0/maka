@@ -36,7 +36,8 @@
 }
 
 .volume-bar {
-    -fx-font-size: 20px;
+    -fx-font-size: 25px;
+    -fx-font-weight: bold;
     -fx-fill: white;
 }
 /* Media view styling */

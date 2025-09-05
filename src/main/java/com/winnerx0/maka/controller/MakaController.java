@@ -160,13 +160,13 @@ public class MakaController implements Initializable {
             mediaView.fitWidthProperty().bind(mediaView.getScene().widthProperty());
             mediaView.fitHeightProperty().bind(mediaView.getScene().heightProperty());
             mediaView.setPreserveRatio(true);
-            volumeIndicator.setText(Double.toString(Math.floor(player.getVolume()  * 100)));
+            volumeIndicator.setText(String.format("%d%%", (int) Math.floor(player.getVolume() * 100)));
             setupProgressBinding();
-
             player.play();
         });
 
         mediaView.setPreserveRatio(true);
+        volumeIndicator.setVisible(false);
 
         mediaView.setMediaPlayer(player);
 
@@ -263,18 +263,25 @@ public class MakaController implements Initializable {
         progressTitle.textProperty().bind(progressTitleBinding);
     }
 
-    public void volumeControl(Volume volume) {
+    public void volumeControl(Volume volume, PauseTransition idleTimer) {
         double volumeInfo = player.getVolume();
-        System.out.println("Current volume: " + volume);
 
+        volumeIndicator.setVisible(true);
         if (volume.equals(Volume.UP)) {
             player.setVolume(Math.min(volumeInfo + 0.01, 1.0));
         } else {
             player.setVolume(Math.max(volumeInfo - 0.01, 0.0));
         }
 
+        idleTimer.playFromStart();
+
+        idleTimer.setOnFinished(event -> {
+            volumeIndicator.setVisible(false);
+            volumeIndicator.setManaged(false);
+        });
+
         double newVolume = player.getVolume();
-        volumeIndicator.setText(Double.toString(Math.floor(newVolume * 100)));
+        volumeIndicator.setText(String.format("%d%%", (int) Math.floor(newVolume * 100)));
     }
 
 }
