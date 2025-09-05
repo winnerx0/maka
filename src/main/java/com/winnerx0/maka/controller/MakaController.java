@@ -1,5 +1,6 @@
 package com.winnerx0.maka.controller;
 
+import com.winnerx0.maka.enums.Skip;
 import com.winnerx0.maka.enums.Volume;
 import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
@@ -8,8 +9,10 @@ import javafx.beans.binding.IntegerBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -49,6 +52,9 @@ public class MakaController implements Initializable {
 
     @FXML
     private VBox vBox;
+
+    @FXML
+    private HBox hBox;
 
     @FXML
     private ProgressBar progressBar;
@@ -115,6 +121,18 @@ public class MakaController implements Initializable {
                 player.seek(seekTime);
             });
 
+            hBox.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    hBox.paddingProperty().bind(
+                            Bindings.createObjectBinding(
+                                    () -> new Insets(20, newScene.getWidth() / 20, 20, newScene.getWidth() / 20),
+                                    newScene.widthProperty()
+                            )
+                    );
+                }
+            });
+
+
         } catch (Exception e) {
             System.err.println("Failed to initialize media");
             e.printStackTrace();
@@ -163,6 +181,15 @@ public class MakaController implements Initializable {
             volumeIndicator.setText(String.format("%d%%", (int) Math.floor(player.getVolume() * 100)));
             setupProgressBinding();
             player.play();
+            PauseTransition idleTimer = new PauseTransition(Duration.seconds(1.5));
+
+            idleTimer.playFromStart();
+
+            idleTimer.setOnFinished(event -> {
+                vBox.setVisible(false);
+                vBox.setManaged(false);
+            });
+
         });
 
         mediaView.setPreserveRatio(true);
@@ -284,4 +311,23 @@ public class MakaController implements Initializable {
         volumeIndicator.setText(String.format("%d%%", (int) Math.floor(newVolume * 100)));
     }
 
+    public void skipControl(Skip skip, PauseTransition idleTimer){
+
+        vBox.setVisible(true);
+
+        if(skip.equals(Skip.FORWARD)){
+            Duration seekTime = player.getCurrentTime().add( Duration.seconds(1));
+            player.seek(seekTime);
+        } else {
+            Duration seekTime = player.getCurrentTime().subtract( Duration.seconds(1));
+            player.seek(seekTime);
+        }
+
+        idleTimer.playFromStart();
+
+        idleTimer.setOnFinished(event -> {
+            vBox.setVisible(false);
+        });
+
+    }
 }

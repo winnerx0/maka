@@ -26,11 +26,11 @@
                        preserveRatio="true"
             />
 
-            <HBox>
+            <HBox fx:id="hBox">
 
-                <padding>
-                    <Insets left="60.0" top="20"/>
-                </padding>
+<!--                <padding>-->
+<!--                    <Insets left="60.0" top="20"/>-->
+<!--                </padding>-->
 
                 <Text styleClass="volume-bar" fx:id="volumeIndicator" />
             </HBox>

@@ -1,6 +1,7 @@
 package com.winnerx0.maka;
 
 import com.winnerx0.maka.controller.MakaController;
+import com.winnerx0.maka.enums.Skip;
 import com.winnerx0.maka.enums.Volume;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
@@ -25,7 +26,9 @@ public class MakaApplication extends Application {
         stage.setTitle("Maka");
 
 
-        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(1.5));
+        PauseTransition volumeTransition = new PauseTransition(Duration.seconds(1.5));
+
+        PauseTransition skipTransition = new PauseTransition(Duration.seconds(1.5));
 
         scene.setOnKeyPressed(keyEvent -> {
             switch(keyEvent.getCode()){
@@ -41,11 +44,16 @@ public class MakaApplication extends Application {
                 case F:
                     stage.setFullScreen(!stage.isFullScreen());
                 case UP:
-                    controller.volumeControl(Volume.UP, pauseTransition);
+                    controller.volumeControl(Volume.UP, volumeTransition);
                     break;
                 case DOWN:
-                    controller.volumeControl(Volume.DOWN, pauseTransition);
+                    controller.volumeControl(Volume.DOWN, volumeTransition);
                     break;
+                case RIGHT:
+                    controller.skipControl(Skip.FORWARD, skipTransition);
+                    break;
+                case LEFT:
+                    controller.skipControl(Skip.BACKWARD, skipTransition);
                 default:
                     break;
             }
